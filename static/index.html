@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+<script src="jquery-3.3.1.min.js"></script>
+<script src="./browse-judge.js"></script>
+<script src="./jquery.utils.contact-min.js"></script>
+<script src="./jquery.zftal.contact-min.js"></script>
+<script src="./jquery.min.js"></script>
+<script src="./jquery.utils.pinyin.min.js"></script>
+
+<script src="jquery-3.3.1.min.js"></script>
+<link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+<script src="bootstrap/js/bootstrap.min.js"></script>
+<link rel="stylesheet" href="nprogress.css">
+<script src="nprogress.js"></script>
+<script>NProgress.start()</script>
+<style>
+	body{
+		font-size: 15px;
+	}
+	.bcg{
+		width: 100vw;
+		height: 100vh;
+		padding: 15px;
+		/* display: flex;
+		flex-wrap: wrap;
+		justify-content: center; */
+	}
+</style>
+<body>
+	<div class="bcg">
+		<div id="alert" class="modal" tabindex="-1" role="dialog">
+			<div class="modal-dialog" role="document">
+			  <div class="modal-content">
+				<div class="modal-header">
+				  <h5 class="modal-title">强烈警告</h5>
+				</div>
+				<div class="modal-body">
+				  <p>输入的学号或密码错误，请重新输入</p>
+				</div>
+				<div class="modal-footer">
+				  <button id="comfirm" type="button" class="btn btn-primary">3</button>
+				</div>
+			  </div>
+			</div>
+		  </div>
+		<div class="input-group mb-3">
+			<div class="input-group-prepend">
+				<span class="input-group-text" id="basic-addon1">学号</span>
+			</div>
+			<input id="user" type="text" class="form-control" placeholder="Username" aria-label="Username"
+				aria-describedby="basic-addon1">
+		</div>
+		<div class="input-group mb-3">
+			<input id="pass" type="password" class="form-control" placeholder="password" aria-label="password"
+				aria-describedby="basic-addon2">
+			<div class="input-group-append">
+				<span class="input-group-text" id="basic-addon2">密码</span>
+			</div>
+		</div>
+		<button id="subtn" type="button" class="btn btn-dark">提交</button>
+	
+		<h5 style="margin-top: 20px;" id="title">查询失败，请检查登陆情况</h5>
+		<table class="table table-striped table-dark">
+			<thead>
+				<tr>
+					<th scope="col">#</th>
+					<th scope="col">课程</th>
+					<th scope="col">课程类型</th>
+					<th scope="col">教师</th>
+					<th scope="col">成绩</th>
+					<th scope="col">绩点</th>
+				</tr>
+			</thead>
+			<tbody id="tab">
+	
+			</tbody>
+		</table>
+	</div>
+</body>
+<script src="base64.js"></script>
+<script src="jsbn.js"></script>
+<script src="prng4.js"></script>
+<script src="rng.js"></script>
+<script src="rsa.js"></script>
+<!-- <script src="login.js"></script> -->
+<script>
+	$('#comfirm').on('click',function(){
+		$('#alert').hide();
+		$('#pass').val('');
+		$('#tab').html('');
+	});
+	$('#subtn').on('click', function () {
+		NProgress.start()
+		$('#tab').html('');
+		// $('#pass').val('');
+		$.ajax({
+			type: 'get',
+			url: '/data',
+			data: $('#user').val(),
+			success: function (data) {
+				console.log(data);
+
+				let { modulus, exponent } = data;
+				var rsaKey = new RSAKey();
+				rsaKey.setPublic(b64tohex(modulus), b64tohex(exponent));
+				var enPassword = hex2b64(rsaKey.encrypt($('#pass').val()));
+				console.log(enPassword);
+
+				$.ajax({
+					type: 'get',
+					url: '/put',
+					// data: {enPassword:enPassword,user:$('#user').val()},
+					data: enPassword,
+					success: function (result) {
+						NProgress.done()
+						console.log('成功');
+
+						$('#title').html('学年:' + result[0].xnmmc + '学期:' + result[0].xqmmc);
+						for (var i = 0; i < result.length; i++) {
+							console.log(result[i]);
+							console.log('----------------------------');
+							$('#tab').html(
+								data +=
+								`
+                <tr>
+                    <th scope="row">`+ i + `</th>
+                    <td>`+ result[i].kcmc + `</td>
+                    <td>`+ result[i].kclbmc + `</td>
+                    <td>`+ result[i].jsxm + `</td>
+                    <td>`+ result[i].cj + `</td>
+                    <td>`+ result[i].jd + `</td>
+        
+                </tr>
+                    `
+							);
+						}
+						$('#tab').html(data);
+						$('#pass').val('');
+					},
+					error: function (res) {
+						NProgress.done()
+						console.log('失败');
+						// alert('学号或者密码错误');
+						let time = 3;
+						$('#comfirm').html(time);
+						$('#comfirm').prop('disabled',true);
+						$('#alert').show();
+						let val = setInterval(function(){
+							time--;
+							$('#comfirm').html(time);
+							if(time == 0){
+								clearInterval(val);
+								$('#comfirm').prop('disabled',false);
+								$('#comfirm').html('确定');
+							}
+						},1000);
+					}
+				});
+			},
+			error: function (res) {
+				NProgress.done()
+				console.log('失败');
+				alert('服务器错误');
+				// $('#alert').show();
+			}
+		});
+	});
+
+</script>
+<script>NProgress.done()</script>
+</html>
