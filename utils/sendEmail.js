@@ -5,8 +5,8 @@ let transporter = nodemailer.createTransport({
     port: 465,
     secure: true, // true for 465, false for other ports
     auth: {
-        user: 'coderlyz@qq.com', // 发送方的邮箱
-        pass: 'eogpwwtzaltvbage' // smtp 的授权码
+        user: '*****@qq.com', // 发送方的邮箱
+        pass: '' // smtp 的授权码
     }
 });
 //pass 不是邮箱账户的密码而是stmp的授权码（必须是相应邮箱的stmp授权码）
@@ -15,7 +15,7 @@ let transporter = nodemailer.createTransport({
 function sendMail(mail, data, call) {
     // 发送的配置项
     let mailOptions = {
-        from: '"hiworlds.xyz" <coderlyz@qq.com>', // 发送方
+        from: '', // 发送方
         to: mail, //接收者邮箱，多个邮箱用逗号间隔
         subject: '老大，你成绩到帐了！', // 标题
         text: '你的成绩更新了', // 文本内容
@@ -46,7 +46,7 @@ function sendMail(mail, data, call) {
 function sendHelloMail(mail, msg, call) {
     // 发送的配置项
     let mailOptions = {
-        from: '"hiworlds.xyz" <coderlyz@qq.com>', // 发送方
+        from: '', // 发送方
         to: mail, //接收者邮箱，多个邮箱用逗号间隔
         subject: msg.subject, // 标题
         text: '', // 文本内容
